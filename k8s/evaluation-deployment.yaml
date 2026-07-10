@@ -16,7 +16,19 @@ spec:
       - name: evaluation-service
         image: evaluation-service
         ports:
-        - containerPort: 8005
+        - containerPort: 8004
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8004
+          initialDelaySeconds: 15
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8004
+          initialDelaySeconds: 5
+          periodSeconds: 5
         resources:
           requests:
             cpu: "50m"

@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: rds-endpoints
+
+data:
+
+  AUTH_DB_HOST: rds-postgres-auth.xxxxxxxxx.us-east-1.rds.amazonaws.com
+
+  FLAG_DB_HOST: rds-postgres-flag.xxxxxxxxx.us-east-1.rds.amazonaws.com
+
+  TARGETING_DB_HOST: rds-postgres-targeting.xxxxxxxxx.us-east-1.rds.amazonaws.com

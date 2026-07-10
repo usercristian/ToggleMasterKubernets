@@ -6,11 +6,16 @@ namespace: togglemaster
 resources:
   - configmap.yaml
   - secret.yaml
+  - aws-auth.yaml
   - auth-deployment.yaml
   - flag-deployment.yaml
   - targeting-deployment.yaml
   - evaluation-deployment.yaml
   - analytics-deployment.yaml
+  - analytics-hpa.yaml
+  - evaluation-hpa.yaml
+  - ingress.yaml
+  - nginx-ingress.yaml
 
 images:
   - name: auth-service
