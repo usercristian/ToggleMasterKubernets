@@ -44,7 +44,7 @@ spec:
               name: togglemaster-config
               key: RDS_FLAG_ENDPOINT
         - name: DATABASE_URL
-          value: "postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@$(RDS_FLAG_ENDPOINT):5432/toggle_db"
+          value: postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@$(RDS_FLAG_ENDPOINT):5432/flags_db
         - name: AUTH_SERVICE_URL
           value: "http://auth-service:8001"
         - name: PORT

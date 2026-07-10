@@ -5,6 +5,7 @@ O presente documento consolida as instrucoes para a replicacao do ecossistema de
 ## Requisitos e Configuracao de Credenciais
 
 - Podman ou Docker com o plugin compose instalado nativamente.
+- Psql
 - Terraform na versao 1.5 ou superior.
 - AWS CLI instalado.
 - Acesso ativo ao AWS Academy Learner Lab.
@@ -210,7 +211,6 @@ Esta seção detalha o fluxo estratégico que adotamos para superar as limitaç�
 
 ---
 
-### Inserir ao final do `readme.md`:
 
 ```markdown
 ## Replicação no Ambiente Restrito (AWS Academy)
@@ -446,9 +446,7 @@ Terraform
 ├── Amazon RDS (3 instâncias)
 ├── Amazon ElastiCache
 ├── Amazon DynamoDB
-└── IAM
 
-            ↓
 
 Kubernetes
 │
