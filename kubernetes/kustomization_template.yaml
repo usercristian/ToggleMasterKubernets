@@ -1,0 +1,28 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - configmap.yaml
+  - secret.yaml
+  - auth-deployment.yaml
+  - flag-deployment.yaml
+  - targeting-deployment.yaml
+  - evaluation-deployment.yaml
+  - analytics-deployment.yaml
+
+images:
+  - name: auth-service
+    newName: <SEU_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/auth-service
+    newTag: latest
+  - name: flag-service
+    newName: <SEU_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/flag-service
+    newTag: latest
+  - name: targeting-service
+    newName: <SEU_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/targeting-service
+    newTag: latest
+  - name: evaluation-service
+    newName: <SEU_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/evaluation-service
+    newTag: latest
+  - name: analytics-service
+    newName: <SEU_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/analytics-service
+    newTag: latest

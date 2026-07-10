@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flag-service
+  labels:
+    app: flag
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flag
+  template:
+    metadata:
+      labels:
+        app: flag
+    spec:
+      containers:
+      - name: flag-service
+        image: flag-service
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8002
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "250m"
+            memory: "256Mi"
+        env:
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: togglemaster-secrets
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: togglemaster-secrets
+              key: POSTGRES_PASSWORD
+        - name: RDS_FLAG_ENDPOINT
+          valueFrom:
+            configMapKeyRef:
+              name: togglemaster-config
+              key: RDS_FLAG_ENDPOINT
+        - name: DATABASE_URL
+          value: "postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@$(RDS_FLAG_ENDPOINT):5432/toggle_db"
+        - name: AUTH_SERVICE_URL
+          value: "http://auth-service:8001"
+        - name: PORT
+          value: "8002"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: flag-service
+spec:
+  type: ClusterIP
+  selector:
+    app: flag
+  ports:
+  - protocol: TCP
+    port: 8002
+    targetPort: 8002

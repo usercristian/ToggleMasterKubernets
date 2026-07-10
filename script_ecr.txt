@@ -1,0 +1,9 @@
+REGISTO="<SEU_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com"
+SERVICOS="auth-service flag-service targeting-service evaluation-service analytics-service"
+
+for SERVICO in $SERVICOS; do
+  echo "A construir e enviar $SERVICO..."
+  podman build -t $SERVICO ./$SERVICO
+  podman tag $SERVICO:latest $REGISTO/$SERVICO:latest
+  podman push $REGISTO/$SERVICO:latest
+done
