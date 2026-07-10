@@ -1,0 +1,61 @@
+apiVersion: batch/v1
+kind: Job
+
+metadata:
+  name: targeting-db-init
+
+spec:
+
+  template:
+
+    spec:
+
+      restartPolicy: Never
+
+      containers:
+
+      - name: postgres-init
+
+        image: postgres:15
+
+        command:
+          - /bin/sh
+          - -c
+
+        args:
+          - |
+            export PGPASSWORD=$POSTGRES_PASSWORD
+
+            psql \
+              -h rds-postgres-targeting.cptcc8odbie7.us-east-1.rds.amazonaws.com \
+              -U $POSTGRES_USER \
+              -d targeting_db \
+              -f /sql/init.sql
+
+        env:
+
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: togglemaster-secrets
+              key: POSTGRES_USER
+
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: togglemaster-secrets
+              key: POSTGRES_PASSWORD
+
+        volumeMounts:
+
+        - name: sql
+
+          mountPath: /sql
+
+      volumes:
+
+      - name: sql
+
+        configMap:
+
+          name: targeting-init-sql

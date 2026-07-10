@@ -2,8 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: evaluation-service
-  labels:
-    app: evaluation
 spec:
   replicas: 1
   selector:
@@ -17,24 +15,14 @@ spec:
       containers:
       - name: evaluation-service
         image: evaluation-service
-        command: ["/bin/sh", "-c"]
-        args: ["./entrypoint.sh && ./main"]
-        imagePullPolicy: Always
-        ports:
-        - containerPort: 8004
-        resources:
-          requests:
-            cpu: "100m"
-            memory: "128Mi"
-          limits:
-            cpu: "250m"
-            memory: "256Mi"
         env:
         - name: MASTER_KEY
           valueFrom:
             secretKeyRef:
               name: togglemaster-secrets
               key: MASTER_KEY
+        - name: AUTH_SERVICE_URL
+          value: "http://auth-service:8001"
         - name: REDIS_ENDPOINT
           valueFrom:
             configMapKeyRef:

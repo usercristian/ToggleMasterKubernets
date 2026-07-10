@@ -35,6 +35,7 @@ kubernetes/secret.yaml
 kubernetes/aws-auth.yaml
 kubernetes/configmap.yaml
 kubernetes/kustomization.yaml
+terraform/rds/db-init/endpoints-configmap.yaml
 
 # Ambientes Virtuais Python
 venv/

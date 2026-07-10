@@ -30,7 +30,7 @@ EOF
 
 echo "Ficheiro $FICHEIRO_TFVARS gerado com sucesso."
 
-DIR_K8S="$DIR_RAIZ/kubernetes"
+DIR_K8S="$DIR_RAIZ/k8s"
 FICHEIRO_SECRET="$DIR_K8S/secret.yaml"
 
 if [ -f "$FICHEIRO_SECRET" ]; then

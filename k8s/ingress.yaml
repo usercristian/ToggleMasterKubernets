@@ -4,33 +4,20 @@ metadata:
   name: togglemaster-ingress
   namespace: togglemaster
   annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/rewrite-target: /$2
 spec:
   ingressClassName: nginx
   rules:
   - http:
       paths:
-      - path: /auth(/|$)(.*)
+      - path: /validate(/|$)(.*)
         pathType: ImplementationSpecific
         backend:
           service:
             name: auth-service
             port:
               number: 8001
-      - path: /flag(/|$)(.*)
-        pathType: ImplementationSpecific
-        backend:
-          service:
-            name: flag-service
-            port:
-              number: 8002
-      - path: /targeting(/|$)(.*)
-        pathType: ImplementationSpecific
-        backend:
-          service:
-            name: targeting-service
-            port:
-              number: 8003
       - path: /evaluation(/|$)(.*)
         pathType: ImplementationSpecific
         backend:
@@ -45,3 +32,17 @@ spec:
             name: analytics-service
             port:
               number: 8005
+      - path: /targeting(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: targeting-service
+            port:
+              number: 8003
+      - path: /flag(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: flag-service
+            port:
+              number: 8002

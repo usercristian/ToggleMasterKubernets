@@ -2,71 +2,120 @@ provider "aws" {
   region = "us-east-1"
 }
 
+#############################
+# Variables
+#############################
+
 variable "db_username" {
-  description = "Credencial de utilizador da base de dados"
+  description = "Usuário administrador do PostgreSQL"
   type        = string
   sensitive   = true
 }
 
 variable "db_password" {
-  description = "Palavra-passe da base de dados"
+  description = "Senha do PostgreSQL"
   type        = string
   sensitive   = true
 }
 
-resource "aws_db_instance" "rds_auth" {
-  identifier             = "rds-postgres-auth"
-  engine                 = "postgres"
-  engine_version         = "15"
-  instance_class         = "db.t3.micro"
-  allocated_storage      = 20
-  db_name                = "auth_db"
-  username = var.db_username
-  password = var.db_password
-  skip_final_snapshot    = true
-  multi_az               = false
-  publicly_accessible    = false
-  monitoring_interval    = 0
+#############################
+# Databases
+#############################
+
+locals {
+
+  databases = {
+
+    auth = {
+      identifier = "rds-postgres-auth"
+      db_name    = "auth_db"
+    }
+
+    flag = {
+      identifier = "rds-postgres-flag"
+      db_name    = "flags_db"
+    }
+
+    targeting = {
+      identifier = "rds-postgres-targeting"
+      db_name    = "targeting_db"
+    }
+
+  }
+
 }
 
-resource "aws_db_instance" "rds_flag" {
-  identifier             = "rds-postgres-flag"
-  engine                 = "postgres"
-  engine_version         = "15"
-  instance_class         = "db.t3.micro"
-  allocated_storage      = 20
-  db_name                = "flags_db"
+#############################
+# RDS PostgreSQL
+#############################
+
+resource "aws_db_instance" "postgres" {
+
+  for_each = local.databases
+
+  identifier = each.value.identifier
+
+  engine         = "postgres"
+  engine_version = "15"
+
+  instance_class    = "db.t3.micro"
+  allocated_storage = 20
+  storage_type      = "gp2"
+
+  db_name  = each.value.db_name
   username = var.db_username
   password = var.db_password
-  skip_final_snapshot    = true
-  multi_az               = false
-  publicly_accessible    = false
-  monitoring_interval    = 0
+
+  publicly_accessible = false
+  multi_az            = false
+
+  skip_final_snapshot = true
+  deletion_protection = false
+
+  apply_immediately          = true
+  auto_minor_version_upgrade = true
+
+  backup_retention_period = 0
+
+  storage_encrypted = true
+
+  monitoring_interval          = 0
+  performance_insights_enabled = false
+
+  copy_tags_to_snapshot = false
+
+  tags = {
+    Project     = "ToggleMaster"
+    Environment = "AWSAcademy"
+    Service     = each.key
+  }
+
 }
 
-resource "aws_db_instance" "rds_targeting" {
-  identifier             = "rds-postgres-targeting"
-  engine                 = "postgres"
-  engine_version         = "15"
-  instance_class         = "db.t3.micro"
-  allocated_storage      = 20
-  db_name                = "targeting_db"
-  username = var.db_username
-  password = var.db_password
-  skip_final_snapshot    = true
-  multi_az               = false
-  publicly_accessible    = false
-  monitoring_interval    = 0
-}
+#############################
+# Outputs
+#############################
 
 output "rds_auth_endpoint" {
-  value = aws_db_instance.rds_auth.endpoint
+  value = aws_db_instance.postgres["auth"].endpoint
 }
 
 output "rds_flag_endpoint" {
-  value = aws_db_instance.rds_flag.endpoint
+  value = aws_db_instance.postgres["flag"].endpoint
 }
 
 output "rds_targeting_endpoint" {
-  value = aws_db_instance.rds_targeting.endpoint
+  value = aws_db_instance.postgres["targeting"].endpoint
+}
+
+output "rds_auth_database" {
+  value = aws_db_instance.postgres["auth"].db_name
+}
+
+output "rds_flag_database" {
+  value = aws_db_instance.postgres["flag"].db_name
+}
+
+output "rds_targeting_database" {
+  value = aws_db_instance.postgres["targeting"].db_name
 }
