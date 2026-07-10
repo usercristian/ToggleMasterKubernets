@@ -1,9 +1,12 @@
 #!/bin/bash
 
-FICHEIRO_ENV=".env"
+DIR_ATUAL="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DIR_RAIZ="$(dirname "$DIR_ATUAL")"
+
+FICHEIRO_ENV="$DIR_RAIZ/.env"
 
 if [ ! -f "$FICHEIRO_ENV" ]; then
-    echo "Ficheiro .env nao encontrado na raiz do projeto."
+    echo "Ficheiro .env nao encontrado na raiz do projeto: $FICHEIRO_ENV"
     exit 1
 fi
 
@@ -11,12 +14,14 @@ set -a
 source "$FICHEIRO_ENV"
 set +a
 
-DIR_TF="terraform/rds"
+DIR_TF="$DIR_RAIZ/terraform/rds"
 FICHEIRO_TFVARS="$DIR_TF/secrets.auto.tfvars"
 
 if [ -f "$FICHEIRO_TFVARS" ]; then
     rm "$FICHEIRO_TFVARS"
 fi
+
+mkdir -p "$DIR_TF"
 
 cat <<EOF > "$FICHEIRO_TFVARS"
 db_username = "$POSTGRES_USER"
@@ -25,7 +30,7 @@ EOF
 
 echo "Ficheiro $FICHEIRO_TFVARS gerado com sucesso."
 
-DIR_K8S="kubernetes"
+DIR_K8S="$DIR_RAIZ/kubernetes"
 FICHEIRO_SECRET="$DIR_K8S/secret.yaml"
 
 if [ -f "$FICHEIRO_SECRET" ]; then
@@ -47,6 +52,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: togglemaster-secrets
+  namespace: togglemaster
 type: Opaque
 data:
   POSTGRES_USER: "$POSTGRES_USER_B64"
