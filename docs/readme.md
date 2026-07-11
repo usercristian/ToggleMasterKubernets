@@ -43,16 +43,13 @@ AWS_SESSION_TOKEN=<SEU_TOKEN_DE_SESSAO>
 
 Na raiz do projeto, execute o comando de construcao. O orquestrador iniciara as instancias do PostgreSQL e do Redis, validara o estado de prontidao das bases de dados e, em seguida, iniciara a compilacao e o arranque das aplicacoes de forma sequencial.
 
+obs: utilizado podman mas é a mesma coisa com docker.
+
 ```bash
 podman-compose up --build -d
 
 ```
 
-## Estrutura de Nuvem Modular
-
-Para contornar as limitacoes rigorosas de permissoes do perfil LabRole do AWS Academy e proteger o orcamento, o provisionamento de infraestrutura como codigo foi dividido em dois dominios isolados: serveless e rds.
-
-Esta divisao assegura a modularidade operacional. Os ficheiros de estado do Terraform operam de forma independente, impedindo que atualizacoes na fila de mensageria causem interrupcoes ou reinicios acidentais nas bases de dados relacionais.
 
 ## Provisionamento da Camada Serveless
 
@@ -101,16 +98,7 @@ Esta camada encarrega-se do provisionamento de 3 instancias independentes do AWS
 
 O codigo Terraform inclui parametros estritos para respeitar a seguranca do Learner Lab. A classe computacional foi fixada em db.t3.micro, a execucao ocorre numa unica zona de disponibilidade, o monitoramento aprimorado foi desativado com um intervalo de zero, e a captura do backup final foi anulada.
 
-Navegue ate a pasta do modulo de bases de dados e aplique a configuracao.
-
-```bash
-cd terraform/rds
-terraform init
-terraform apply
-
-```
-
-Os endpoints DNS de cada uma das 3 instancias serao impressos no terminal para integracao no ecossistema.
+Navegue ate a pasta do modulo de bases de dados e aplique a configuracao e instruções do readme no diretório.
 
 ## Rotina de Otimizacao de Custos
 
@@ -126,7 +114,6 @@ terraform destroy
 
 A camada serveless e os repositorios de imagens podem permanecer intactos, permitindo que a infraestrutura fundacional seja preservada para os dias seguintes sem perdas financeiras.
 
-```
 
 ## Provisionamento da Camada de Cache em Memoria
 
@@ -156,13 +143,6 @@ cd terraform/elasticache
 terraform destroy
 
 ```
-
-Para refletir as dependências necessárias para a equipa, adicione os seguintes itens à lista de pré-requisitos já existente no início do seu ficheiro readme.md:
-
-* kubectl (versão 1.31 ou superior)
-* utilitários nativos de terminal Linux (bash, base64)
-
-Em seguida, adicione o bloco de texto abaixo no final do seu ficheiro readme.md.
 
 ## Orquestração no Kubernetes (Amazon EKS)
 
@@ -205,14 +185,6 @@ kubectl rollout restart deployment auth-service flag-service targeting-service e
 
 ```
 
-Para atualizar o seu arquivo `readme.md` de forma estruturada, mantendo os princípios de modularidade e facilidade de manutenção para que seus colegas de grupo consigam replicar exatamente o laboratório, adicione a seção a seguir ao final do documento.
-
-Esta seção detalha o fluxo estratégico que adotamos para superar as limitações do ambiente do AWS Academy, incluindo o uso do novo modo de autenticação e a gestão de arquivos de configuração.
-
----
-
-
-```markdown
 ## Replicação no Ambiente Restrito (AWS Academy)
 
 Para reproduzir esta implantação com sucesso na infraestrutura do AWS Academy utilizando a `LabRole`, é mandatório seguir a arquitetura validada e os contornos técnicos listados abaixo.
@@ -289,192 +261,6 @@ kubectl get pods -n togglemaster -w
 
 ```
 
-# Inicialização dos Bancos PostgreSQL (RDS)
-
-## Problema
-
-O Terraform cria apenas as instâncias do Amazon RDS e os bancos (`auth_db`, `flags_db` e `targeting_db`), porém **não cria as tabelas** utilizadas pelos microsserviços.
-
-Os scripts SQL de criação encontram-se em:
-
-```text
-auth-service/db/init.sql
-flag-service/db/init.sql
-targeting-service/db/init.sql
-```
-
-Sem executar esses scripts, os serviços apresentam erros como:
-
-```text
-ERROR: relation "api_keys" does not exist
-ERROR: relation "flags" does not exist
-ERROR: relation "targeting_rules" does not exist
-```
-
----
-
-# Solução adotada
-
-Foi criado um conjunto de **Kubernetes Jobs** responsáveis por inicializar automaticamente cada banco de dados.
-
-Estrutura:
-
-```text
-terraform/
-└── rds/
-    └── db-init/
-        ├── auth-job.yaml
-        ├── flag-job.yaml
-        ├── targeting-job.yaml
-        ├── auth-configmap.yaml
-        ├── flag-configmap.yaml
-        ├── targeting-configmap.yaml
-        └── kustomization.yaml
-```
-
-Cada ConfigMap incorpora o conteúdo do respectivo `init.sql` e o Job executa:
-
-```bash
-psql -h <RDS_ENDPOINT> \
-     -U $POSTGRES_USER \
-     -d <DATABASE> \
-     -f /sql/init.sql
-```
-
-Como todos os scripts utilizam:
-
-```sql
-CREATE TABLE IF NOT EXISTS
-```
-
-a execução é **idempotente**, podendo ser repetida sem causar erros.
-
----
-
-# Ordem correta de deploy
-
-## 1 - Provisionar infraestrutura
-
-Executar normalmente o Terraform para criar:
-
-- Amazon RDS
-- ElastiCache
-- DynamoDB
-
-```bash
-cd terraform/rds
-
-terraform init
-terraform apply
-```
-
----
-
-## 2 - Inicializar os bancos
-
-Aplicar os Jobs responsáveis pela criação das tabelas:
-
-```bash
-kubectl apply -k terraform/rds/db-init
-```
-
-Verificar se finalizaram com sucesso:
-
-```bash
-kubectl get jobs -n togglemaster
-```
-
-Resultado esperado:
-
-```text
-auth-db-init        Complete
-flag-db-init        Complete
-targeting-db-init   Complete
-```
-
-Também é possível validar os logs:
-
-```bash
-kubectl logs job/auth-db-init -n togglemaster
-kubectl logs job/flag-db-init -n togglemaster
-kubectl logs job/targeting-db-init -n togglemaster
-```
-
----
-
-## 3 - Fazer o deploy da aplicação
-
-Após os bancos estarem inicializados:
-
-```bash
-kubectl apply -k k8s
-```
-
-ou reiniciar os deployments:
-
-```bash
-kubectl rollout restart deployment -n togglemaster
-```
-
----
-
-# Reexecutando os Jobs
-
-Caso seja necessário executar novamente os scripts:
-
-```bash
-kubectl delete jobs \
-auth-db-init \
-flag-db-init \
-targeting-db-init \
--n togglemaster
-```
-
-Depois:
-
-```bash
-kubectl apply -k terraform/rds/db-init
-```
-
----
-
-# Fluxo completo da infraestrutura
-
-```text
-Terraform
-│
-├── Amazon RDS (3 instâncias)
-├── Amazon ElastiCache
-├── Amazon DynamoDB
-
-
-Kubernetes
-│
-├── ConfigMaps
-├── Secrets
-├── Jobs de inicialização do banco
-│      ├── auth-db-init
-│      ├── flag-db-init
-│      └── targeting-db-init
-│
-└── Deployments dos microsserviços
-       ├── auth-service
-       ├── flag-service
-       ├── targeting-service
-       ├── evaluation-service
-       └── analytics-service
-```
-
----
-
-# Observações
-
-- Os Jobs apenas inicializam o esquema do banco.
-- Eles não removem dados existentes.
-- A execução é segura graças ao uso de `CREATE TABLE IF NOT EXISTS`.
-- Caso novas tabelas sejam adicionadas futuramente, basta atualizar os respectivos arquivos `init.sql` e reaplicar os Jobs.
-
----
 
 ## Instruções para Testes de Escalabilidade
 
