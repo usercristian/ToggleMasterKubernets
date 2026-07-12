@@ -4,6 +4,8 @@
 
 O ToggleMaster e um sistema de gerenciamento de feature flags baseado em microsservicos. O projeto possibilita o controle dinamico da liberacao de funcionalidades em aplicacoes, gerenciando regras de segmentacao de usuarios e a avaliacao de flags.
 
+---
+
 Tecnologias presentes no projeto:
 - Python
 - Go
@@ -128,3 +130,12 @@ O acesso dos clientes ocorre através do **NGINX Ingress Controller**, publicado
      (5432)           (6379)        (HTTPS 443)
 ```
 
+### Projeto realizado por
+
+| Nome | RM |
+| :--- | :--- |
+| Alexander Auerhahn
+| Alison Isidro
+| Cristian Gadelha
+| Rodrigo Reis
+| Tiago Martins
