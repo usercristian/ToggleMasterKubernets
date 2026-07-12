@@ -26,21 +26,6 @@ ERROR: relation "targeting_rules" does not exist
 
 Foi criado um conjunto de **Kubernetes Jobs** responsáveis por inicializar automaticamente cada banco de dados.
 
-Estrutura:
-
-```text
-terraform/
-└── rds/
-    └── db-init/
-        ├── auth-job.yaml
-        ├── flag-job.yaml
-        ├── targeting-job.yaml
-        ├── auth-configmap.yaml
-        ├── flag-configmap.yaml
-        ├── targeting-configmap.yaml
-        └── kustomization.yaml
-```
-
 Cada ConfigMap incorpora o conteúdo do respectivo `init.sql` e o Job executa:
 
 ```bash
@@ -82,16 +67,6 @@ terraform apply
 ## 2 - Inicializar os bancos
 
 Aplicar os Jobs responsáveis pela criação das tabelas:
-
-```bash
-kubectl apply -k terraform/rds/db-init
-```
-
-Verificar se finalizaram com sucesso:
-
-```bash
-kubectl get jobs -n togglemaster
-```
 
 Resultado esperado:
 
@@ -143,36 +118,6 @@ Depois:
 
 ```bash
 kubectl apply -k terraform/rds/db-init
-```
-
----
-
-# Fluxo completo da infraestrutura
-
-```text
-Terraform
-│
-├── Amazon EKS
-├── Amazon RDS (3 instâncias)
-├── Amazon ElastiCache
-├── Amazon DynamoDB
-
-
-Kubernetes
-│
-├── ConfigMaps
-├── Secrets
-├── Jobs de inicialização do banco
-│      ├── auth-db-init
-│      ├── flag-db-init
-│      └── targeting-db-init
-│
-└── Deployments dos microsserviços
-       ├── auth-service
-       ├── flag-service
-       ├── targeting-service
-       ├── evaluation-service
-       └── analytics-service
 ```
 
 ---

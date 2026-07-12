@@ -1,48 +1,47 @@
 
 Summary:
-  Total:	68.1875 secs
-  Slowest:	19.9026 secs
-  Fastest:	0.1240 secs
-  Average:	6.4549 secs
-  Requests/sec:	66.6545
+  Total:	65.1246 secs
+  Slowest:	8.9598 secs
+  Fastest:	0.1321 secs
+  Average:	5.3552 secs
+  Requests/sec:	89.3825
   
-  Total data:	281772 bytes
-  Size/request:	64 bytes
+  Total data:	262127 bytes
+  Size/request:	45 bytes
 
 Response time histogram:
-  0.124 [1]	|
-  2.102 [1413]	|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
-  4.080 [756]	|■■■■■■■■■■■■■■■■■■■■■
-  6.058 [680]	|■■■■■■■■■■■■■■■■■■■
-  8.035 [151]	|■■■■
-  10.013 [99]	|■■■
-  11.991 [109]	|■■■
-  13.969 [321]	|■■■■■■■■■
-  15.947 [265]	|■■■■■■■■
-  17.925 [288]	|■■■■■■■■
-  19.903 [275]	|■■■■■■■■
+  0.132 [1]	|
+  1.015 [15]	|
+  1.898 [24]	|
+  2.780 [24]	|
+  3.663 [39]	|
+  4.546 [34]	|
+  5.429 [4624]	|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+  6.312 [625]	|■■■■■
+  7.194 [147]	|■
+  8.077 [191]	|■■
+  8.960 [97]	|■
 
 
 Latency distribution:
-  10%% in 0.4135 secs
-  25%% in 1.4023 secs
-  50%% in 4.1016 secs
-  75%% in 12.4685 secs
-  90%% in 16.4731 secs
-  95%% in 18.0996 secs
-  99%% in 18.7679 secs
+  10%% in 5.1319 secs
+  25%% in 5.1336 secs
+  50%% in 5.1804 secs
+  75%% in 5.3059 secs
+  90%% in 5.7852 secs
+  95%% in 6.8310 secs
+  99%% in 8.2587 secs
 
 Details (average, fastest, slowest):
-  DNS+dialup:	0.0140 secs, 0.0000 secs, 0.1449 secs
+  DNS+dialup:	0.0116 secs, 0.0000 secs, 0.1653 secs
   DNS-lookup:	0.0000 secs, 0.0000 secs, 0.0000 secs
-  req write:	0.0000 secs, 0.0000 secs, 0.0011 secs
-  resp wait:	6.4376 secs, 0.1238 secs, 19.8961 secs
-  resp read:	0.0001 secs, 0.0000 secs, 0.0018 secs
+  req write:	0.0000 secs, 0.0000 secs, 0.0015 secs
+  resp wait:	5.3435 secs, 0.1319 secs, 8.8251 secs
+  resp read:	0.0001 secs, 0.0000 secs, 0.0030 secs
 
 Status code distribution:
-  [200]	3215 responses
-  [502]	1143 responses
+  [200]	207 responses
+  [502]	5614 responses
 
-Error distribution:
-  [187]	Get "http://34.229.84.8:32196/evaluation/evaluate?user_id=user-123&flag_name=enable-new-dashboard": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+
 

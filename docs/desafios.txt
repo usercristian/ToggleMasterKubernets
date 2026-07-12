@@ -10,13 +10,17 @@ equilibrado entre modularidade e planificação dos diretorios
 
 criar o eks no console devido limitações do lab ficar atento aos add-ons
 
-nano ~/.aws/credentials
-nano ~/.kube/config
+Pegar as crendenciais no aws academy depois nano ~/.aws/credentials
+editar o .env com as credencias
+iniciar o elasticache no terraform init e depois terraform apply
+roda o gerar_secrets.sh
+
+Criar o eks com cuidado com os add-ons e desativar o auto-mode
 aws eks update-kubeconfig --region us-east-1 --name togglemaster-ks
 kubectl get namespace
 kubectl get svc -n togglemaster ingress-nginx-controller
 
-antes de dar o apply, validar o secret.yaml,.venv e roda o gerar_secrets.sh
+antes de dar o apply, validar o secret.yaml,.venv
 coletar o ecr e fazer upload das imagens do docker usando o script_ecr
 fazer o kubectl apply -k .
 ele que vai carregar os manifestos para dentro dos pods

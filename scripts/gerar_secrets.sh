@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+set -euo pipefail
 
 DIR_ATUAL="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DIR_RAIZ="$(dirname "$DIR_ATUAL")"
@@ -6,7 +8,8 @@ DIR_RAIZ="$(dirname "$DIR_ATUAL")"
 FICHEIRO_ENV="$DIR_RAIZ/.env"
 
 if [ ! -f "$FICHEIRO_ENV" ]; then
-    echo "Ficheiro .env nao encontrado na raiz do projeto: $FICHEIRO_ENV"
+    echo "Erro: ficheiro .env não encontrado em:"
+    echo "$FICHEIRO_ENV"
     exit 1
 fi
 
@@ -14,54 +17,74 @@ set -a
 source "$FICHEIRO_ENV"
 set +a
 
+#########################################
+# Validação das variáveis obrigatórias
+#########################################
+
+VARIAVEIS=(
+    POSTGRES_USER
+    POSTGRES_PASSWORD
+    MASTER_KEY
+    SERVICE_API_KEY
+    AWS_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY
+    AWS_SESSION_TOKEN
+)
+
+for VAR in "${VARIAVEIS[@]}"; do
+    if [ -z "${!VAR:-}" ]; then
+        echo "Erro: variável $VAR não encontrada no .env"
+        exit 1
+    fi
+done
+
+#########################################
+# Terraform RDS
+#########################################
+
 DIR_TF="$DIR_RAIZ/terraform/rds"
-FICHEIRO_TFVARS="$DIR_TF/secrets.auto.tfvars"
-
-if [ -f "$FICHEIRO_TFVARS" ]; then
-    rm "$FICHEIRO_TFVARS"
-fi
-
 mkdir -p "$DIR_TF"
 
-cat <<EOF > "$FICHEIRO_TFVARS"
+cat > "$DIR_TF/secrets.auto.tfvars" <<EOF
 db_username = "$POSTGRES_USER"
 db_password = "$POSTGRES_PASSWORD"
 EOF
 
-echo "Ficheiro $FICHEIRO_TFVARS gerado com sucesso."
+echo "✓ terraform/rds/secrets.auto.tfvars gerado."
+
+#########################################
+# Kubernetes Secret
+#########################################
 
 DIR_K8S="$DIR_RAIZ/k8s"
-FICHEIRO_SECRET="$DIR_K8S/secret.yaml"
-
-if [ -f "$FICHEIRO_SECRET" ]; then
-    rm "$FICHEIRO_SECRET"
-fi
-
 mkdir -p "$DIR_K8S"
 
-POSTGRES_USER_B64=$(echo -n "$POSTGRES_USER" | base64 -w 0)
-POSTGRES_PASSWORD_B64=$(echo -n "$POSTGRES_PASSWORD" | base64 -w 0)
-MASTER_KEY_B64=$(echo -n "$MASTER_KEY" | base64 -w 0)
-SERVICE_API_KEY_B64=$(echo -n "$SERVICE_API_KEY" | base64 -w 0)
-AWS_ACCESS_KEY_ID_B64=$(echo -n "$AWS_ACCESS_KEY_ID" | base64 -w 0)
-AWS_SECRET_ACCESS_KEY_B64=$(echo -n "$AWS_SECRET_ACCESS_KEY" | base64 -w 0)
-AWS_SESSION_TOKEN_B64=$(echo -n "$AWS_SESSION_TOKEN" | base64 -w 0)
+POSTGRES_USER_B64=$(printf "%s" "$POSTGRES_USER" | base64 -w0)
+POSTGRES_PASSWORD_B64=$(printf "%s" "$POSTGRES_PASSWORD" | base64 -w0)
+MASTER_KEY_B64=$(printf "%s" "$MASTER_KEY" | base64 -w0)
+SERVICE_API_KEY_B64=$(printf "%s" "$SERVICE_API_KEY" | base64 -w0)
+AWS_ACCESS_KEY_ID_B64=$(printf "%s" "$AWS_ACCESS_KEY_ID" | base64 -w0)
+AWS_SECRET_ACCESS_KEY_B64=$(printf "%s" "$AWS_SECRET_ACCESS_KEY" | base64 -w0)
+AWS_SESSION_TOKEN_B64=$(printf "%s" "$AWS_SESSION_TOKEN" | base64 -w0)
 
-cat <<EOF > "$FICHEIRO_SECRET"
+cat > "$DIR_K8S/secret.yaml" <<EOF
 apiVersion: v1
 kind: Secret
 metadata:
   name: togglemaster-secrets
   namespace: togglemaster
 type: Opaque
+
 data:
-  POSTGRES_USER: "$POSTGRES_USER_B64"
-  POSTGRES_PASSWORD: "$POSTGRES_PASSWORD_B64"
-  MASTER_KEY: "$MASTER_KEY_B64"
-  SERVICE_API_KEY: "$SERVICE_API_KEY_B64"
-  AWS_ACCESS_KEY_ID: "$AWS_ACCESS_KEY_ID_B64"
-  AWS_SECRET_ACCESS_KEY: "$AWS_SECRET_ACCESS_KEY_B64"
-  AWS_SESSION_TOKEN: "$AWS_SESSION_TOKEN_B64"
+  POSTGRES_USER: $POSTGRES_USER_B64
+  POSTGRES_PASSWORD: $POSTGRES_PASSWORD_B64
+  MASTER_KEY: $MASTER_KEY_B64
+  SERVICE_API_KEY: $SERVICE_API_KEY_B64
+  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_B64
+  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_B64
+  AWS_SESSION_TOKEN: $AWS_SESSION_TOKEN_B64
 EOF
 
-echo "Ficheiro $FICHEIRO_SECRET gerado com sucesso no formato base64."
+echo "✓ k8s/secret.yaml gerado."
+echo
+echo "Tudo concluído com sucesso."

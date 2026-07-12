@@ -31,11 +31,11 @@ override.tf.json
 *.pem
 credentials
 *.auto.tfvars
-kubernetes/secret.yaml
-kubernetes/aws-auth.yaml
-kubernetes/configmap.yaml
-kubernetes/kustomization.yaml
-terraform/rds/db-init/endpoints-configmap.yaml
+k8s/services/secret.yaml
+k8s/services/aws-auth.yaml
+k8s/services/configmap.yaml
+k8s/services/kustomization.yaml
+k8s/db-init/endpoints-configmap.yaml
 
 # Ambientes Virtuais Python
 venv/

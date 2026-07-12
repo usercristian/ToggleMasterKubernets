@@ -45,6 +45,42 @@ locals {
 
 }
 
+####################################
+# VPC
+####################################
+
+data "aws_vpc" "default" {
+  default = true
+}
+
+####################################
+# Security Groups
+####################################
+
+resource "aws_security_group" "postgres" {
+
+  for_each = local.databases
+
+  name        = "${each.key}-postgres-sg"
+  description = "Security Group do banco ${each.key}"
+  vpc_id      = data.aws_vpc.default.id
+
+  ingress {
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
+    cidr_blocks = []
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+}
+
 #############################
 # RDS PostgreSQL
 #############################
@@ -83,6 +119,10 @@ resource "aws_db_instance" "postgres" {
   performance_insights_enabled = false
 
   copy_tags_to_snapshot = false
+
+  vpc_security_group_ids = [
+  aws_security_group.postgres[each.key].id
+]
 
   tags = {
     Project     = "ToggleMaster"
