@@ -200,7 +200,7 @@ Em seguida cria as regras necessárias para permitir:
 - EKS → PostgreSQL (5432)
 - EKS → Redis (6379)
 
-Execute primeiramente o script *sgnode.sh* para encontrar o security groups e colocar em uma variavel, sem ele o aws academy não permite criar via terraform devido as restrições do labrole.
+Execute primeiramente o script *confignetwork.sh* para encontrar o security groups e colocar em uma variavel, sem ele o aws academy não permite criar via terraform devido as restrições do labrole.
 
 
 ```bash

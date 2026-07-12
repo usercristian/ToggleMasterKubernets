@@ -124,11 +124,6 @@ O script coletará os dados automaticamente, monitorará o ciclo de vida dos pod
 
 ---
 
-
-Sim. Para não esquecer no README, eu faria uma seção específica chamada **Configuração dos Security Groups**. No seu projeto, há dois fluxos de comunicação: **externo** (Internet → EKS) e **interno** (Pods → AWS).
-
----
-
 # Security Groups necessários
 
 ## 1. EKS (Worker Nodes)
@@ -247,35 +242,9 @@ Assim como o DynamoDB:
 
 ---
 
-# Fluxo completo
-
-```text
-                    Internet
-                        │
-                        ▼
-               Security Group EKS
-                 TCP 32594/31079
-                        │
-                        ▼
-             NGINX Ingress Controller
-                        │
-        ┌───────────────┼───────────────┐
-        ▼               ▼               ▼
-   auth-service    flag-service   targeting...
-        │               │
-        ├───────────────┼───────────────┐
-        ▼               ▼               ▼
-      RDS           ElastiCache     DynamoDB/SQS
-     (5432)           (6379)        (HTTPS 443)
-```
-
-### Recomendação adicional
-
-Se você pretende deixar esse projeto como portfólio, vale documentar também a arquitetura de rede:
+### Arquitetura de rede:
 
 * **Security Group do EKS**: recebe tráfego externo nas portas do Ingress (32594/31079) e faz conexões de saída.
 * **Security Group do RDS**: permite entrada apenas do SG do EKS na porta 5432.
 * **Security Group do ElastiCache**: permite entrada apenas do SG do EKS na porta 6379.
 * **DynamoDB e SQS**: acessados via HTTPS com autenticação IAM, sem Security Groups próprios.
-
-Essa documentação deixa claro o princípio de menor privilégio adotado na infraestrutura e facilita a reprodução do ambiente por outros integrantes da equipe.

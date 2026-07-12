@@ -42,7 +42,6 @@ Ecossistema de microsservicos localmente, atraves da orquestracao de contentores
 
 # Arquitetura de Nuvem
 
-O projeto utiliza a **VPC padrão** disponibilizada pelo ambiente AWS Academy devido as limitações do ambiente. Dessa forma, não foi necessária a criação de uma infraestrutura de rede personalizada (VPC, Subnets, Route Tables ou Internet Gateway).
 
 ## Componentes
 
@@ -95,27 +94,6 @@ O Security Group associado aos Worker Nodes deve possuir acesso de saída para:
 - Amazon SQS (HTTPS 443)
 - Amazon ECR (HTTPS 443)
 
-### Amazon RDS
-
-Cada instância PostgreSQL permite conexões apenas provenientes do Security Group do cluster EKS.
-
-Porta utilizada:
-
-- TCP 5432
-
-### Amazon ElastiCache
-
-O Redis permite conexões apenas provenientes do Security Group do cluster EKS.
-
-Porta utilizada:
-
-- TCP 6379
-
-## Subnets
-
-Foram utilizadas as **Subnets padrão da VPC** disponibilizadas pela AWS Academy.
-
-Os Worker Nodes do Amazon EKS, bem como as instâncias RDS e o ElastiCache, encontram-se nessas subnets privadas/padrão, permitindo comunicação interna dentro da VPC.
 
 ## Acesso Externo
 
@@ -127,4 +105,26 @@ O acesso dos clientes ocorre através do **NGINX Ingress Controller**, publicado
 - Não há acesso público direto ao ElastiCache Redis.
 - DynamoDB, SQS e ECR são acessados através das APIs da AWS utilizando HTTPS.
 - Toda comunicação entre os microserviços ocorre internamente dentro do cluster Kubernetes.
+
+# Fluxo completo
+
+```text
+                    Internet
+                        │
+                        ▼
+               Security Group EKS
+                 TCP 32594/31079
+                        │
+                        ▼
+             NGINX Ingress Controller
+                        │
+        ┌───────────────┼───────────────┐
+        ▼               ▼               ▼
+   auth-service    flag-service   targeting...
+        │               │
+        ├───────────────┼───────────────┐
+        ▼               ▼               ▼
+      RDS           ElastiCache     DynamoDB/SQS
+     (5432)           (6379)        (HTTPS 443)
+```
 
