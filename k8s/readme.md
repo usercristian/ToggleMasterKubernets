@@ -29,19 +29,27 @@ Antes de realizar o deploy:
 
 ## Deploy
 
+* Atualize seu acesso ao cluster: `aws eks update-kubeconfig --region us-east-1 --name [nome-do-cluster]`.
+
 ### 1. Criar o namespace
 
+Dentro do diretório aplique os comandos a seguir
+
 ```bash
-kubectl apply -f k8s/namespace.yaml
+kubectl apply -f namespace.yaml
 ```
 
 ### 2. Inicializar as bases de dados
 
+
+
 Cria automaticamente as tabelas necessárias em cada instância PostgreSQL.
 
 ```bash
-kubectl apply -k k8s/db-init
+kubectl apply -k db-init
+
 ```
+
 
 Verificar a execução:
 
@@ -51,10 +59,21 @@ kubectl get jobs -n togglemaster
 
 Todos os Jobs devem estar com o estado **Complete**.
 
+Agora só limpar os jobs
+
+```bash
+kubectl delete jobs \
+auth-db-init \
+flag-db-init \
+targeting-db-init \
+-n togglemaster
+
+```
+
 ### 3. Implantar os serviços
 
 ```bash
-kubectl apply -k k8s/services
+kubectl apply -k services
 ```
 
 ## Verificação
@@ -89,14 +108,7 @@ kubectl get ingress -n togglemaster
 * **`authenticationMode: EKS_API`**: Substitui o antigo ConfigMap `aws-auth` pelo recurso nativo da AWS chamado *Access Entries*. O próprio EKS gerencia o registro e a autorização do Node Group na API do Kubernetes, eliminando erros manuais de mapeamento interno. O arquivo `aws-auth.yaml` torna-se obsoleto e foi descartado.
 * **`remoteAccess: false`**: O acesso remoto (SSH) deve ser desativado. Caso seja ativado, o EKS tentará criar um Security Group dedicado para a porta 22 por meio de chamadas de API externas, o que é imediatamente bloqueado pelo perfil de privilégios da `LabRole`.
 
-## 1 Conexão e aplicação do Kubernetes
-
-* Atualize seu acesso ao cluster: `aws eks update-kubeconfig --region us-east-1 --name [nome-do-cluster]`.
-* Aplique os manifestos de infraestrutura: `kubectl apply -k k8s/`.
-* Verifique se todos os pods estão em execução: `kubectl get pods -n togglemaster`.
-
-
-### 2. Gestão de Segredos e Variáveis (`_template`)
+##  Gestão de Segredos e Variáveis (`_template`)
 
 Seguindo as boas práticas do pilar de Segurança, o repositório remoto armazena apenas os esqueletos de configuração (`configmap_template.yaml` e `secret_template.yaml`) para evitar a exposição inadvertida de credenciais.
 

@@ -1,7 +1,3 @@
-provider "aws" {
-  region = "us-east-1"
-}
-
 data "aws_db_instance" "auth" {
   db_instance_identifier = "rds-postgres-auth"
 }

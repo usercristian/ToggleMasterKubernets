@@ -3,23 +3,23 @@ kind: Kustomization
 
 namespace: togglemaster
 
+configMapGenerator:
+  - name: auth-init-sql
+    files:
+      - init.sql=auth/init.sql
+
+  - name: flag-init-sql
+    files:
+      - init.sql=flag/init.sql
+
+  - name: targeting-init-sql
+    files:
+      - init.sql=targeting/init.sql
+
 resources:
   - auth-job.yaml
   - flag-job.yaml
   - targeting-job.yaml
-
-configMapGenerator:
-  - name: auth-init-sql
-    files:
-      - init.sql=../../auth-service/db/init.sql
-
-  - name: flag-init-sql
-    files:
-      - init.sql=../../flag-service/db/init.sql
-
-  - name: targeting-init-sql
-    files:
-      - init.sql=../../targeting-service/db/init.sql
 
 generatorOptions:
   disableNameSuffixHash: true

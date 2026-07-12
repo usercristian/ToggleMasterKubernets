@@ -24,7 +24,7 @@ escalabilidade.sh
 Executa rotinas de teste de carga contra os endpoints do cluster EKS. O objetivo e simular um pico de acesso para acionar e validar o comportamento do Horizontal Pod Autoscaler (HPA) e a alocacao de novos pods nos worker nodes.
 
 carga.log
-Arquivo de texto gerado dinamicamente que armazena os registros e metricas de saida durante a execucao do script de teste de escalabilidade, servindo como auditoria dos resultados do teste.
+Arquivo de texto gerado dinamicamente que armazena os registros e metricas de saida durante a execucao do script de teste de escalabilidade.
 
 sgnode.sh
 Pega o security para criar o networking via terraform

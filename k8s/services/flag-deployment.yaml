@@ -32,13 +32,6 @@ spec:
             port: 8002
           initialDelaySeconds: 5
           periodSeconds: 5
-        resources:
-          requests:
-            cpu: "50m"
-            memory: "64Mi"
-          limits:
-            cpu: "100m"
-            memory: "128Mi"
         env:
         - name: POSTGRES_USER
           valueFrom:
@@ -61,6 +54,13 @@ spec:
           value: "http://auth-service:8001"
         - name: PORT
           value: "8002"
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 250m
+            memory: 128Mi
 ---
 apiVersion: v1
 kind: Service

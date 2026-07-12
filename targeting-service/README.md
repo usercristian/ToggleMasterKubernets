@@ -45,49 +45,4 @@ Este é o serviço de regras de segmentação (targeting) do projeto ToggleMaste
     ```
     O servidor estará rodando em `http://localhost:8003`.
 
-## 🧪 Testando os Endpoints
 
-Lembre-se de obter sua `SUA_CHAVE_API` no `auth-service` (veja o README do `flag-service`).
-
-**1. Verifique a Saúde (Health Check):**
-```bash
-curl http://localhost:8003/health
-```
-Saída esperada: `{"status":"ok"}`
-
-**2. Crie uma nova Regra de Segmentação:** Vamos criar uma regra para a flag enable-new-dashboard (que você criou no flag-service). Esta regra fará a flag aparecer para 50% dos usuários.
-```bash
-curl -X POST http://localhost:8003/rules \
--H "Content-Type: application/json" \
--H "Authorization: Bearer SUA_CHAVE_API" \
--d '{
-    "flag_name": "enable-new-dashboard",
-    "is_enabled": true,
-    "rules": {
-        "type": "PERCENTAGE",
-        "value": 50
-    }
-}'
-```
-Saída esperada: (Um JSON com os dados da regra criada).
-
-**3. Busque a Regra que você criou:**
-```bash
-curl http://localhost:8003/rules/enable-new-dashboard \
--H "Authorization: Bearer SUA_CHAVE_API"
-```
-Saída esperada: (O JSON da regra que você acabou de criar).
-
-**4. Atualize a Regra (mude para 75%):**
-```bash
-curl -X PUT http://localhost:8003/rules/enable-new-dashboard \
--H "Content-Type: application/json" \
--H "Authorization: Bearer SUA_CHAVE_API" \
--d '{
-    "rules": {
-        "type": "PERCENTAGE",
-        "value": 75
-    }
-}'
-```
-Saída esperada: (O JSON da regra atualizada, com `"value": 75`).

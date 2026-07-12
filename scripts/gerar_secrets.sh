@@ -17,31 +17,41 @@ set -a
 source "$FICHEIRO_ENV"
 set +a
 
-#########################################
-# Validação das variáveis obrigatórias
-#########################################
+# Extrair credenciais da AWS dinamicamente
+AWS_ACCESS_KEY_ID=$(aws configure get aws_access_key_id || echo "")
+AWS_SECRET_ACCESS_KEY=$(aws configure get aws_secret_access_key || echo "")
+AWS_SESSION_TOKEN=$(aws configure get aws_session_token || echo "")
 
-VARIAVEIS=(
+# Validação das variáveis obrigatórias do .env
+VARIAVEIS_ENV=(
     POSTGRES_USER
     POSTGRES_PASSWORD
     MASTER_KEY
     SERVICE_API_KEY
-    AWS_ACCESS_KEY_ID
-    AWS_SECRET_ACCESS_KEY
-    AWS_SESSION_TOKEN
 )
 
-for VAR in "${VARIAVEIS[@]}"; do
+for VAR in "${VARIAVEIS_ENV[@]}"; do
     if [ -z "${!VAR:-}" ]; then
         echo "Erro: variável $VAR não encontrada no .env"
         exit 1
     fi
 done
 
-#########################################
-# Terraform RDS
-#########################################
+# Validação das credenciais da AWS
+VARIAVEIS_AWS=(
+    AWS_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY
+    AWS_SESSION_TOKEN
+)
 
+for VAR in "${VARIAVEIS_AWS[@]}"; do
+    if [ -z "${!VAR:-}" ]; then
+        echo "Erro: credencial $VAR não encontrada nas configurações locais da AWS."
+        exit 1
+    fi
+done
+
+# Terraform RDS
 DIR_TF="$DIR_RAIZ/terraform/rds"
 mkdir -p "$DIR_TF"
 
@@ -52,11 +62,8 @@ EOF
 
 echo "✓ terraform/rds/secrets.auto.tfvars gerado."
 
-#########################################
 # Kubernetes Secret
-#########################################
-
-DIR_K8S="$DIR_RAIZ/k8s"
+DIR_K8S="$DIR_RAIZ/k8s/services"
 mkdir -p "$DIR_K8S"
 
 POSTGRES_USER_B64=$(printf "%s" "$POSTGRES_USER" | base64 -w0)
@@ -85,6 +92,6 @@ data:
   AWS_SESSION_TOKEN: $AWS_SESSION_TOKEN_B64
 EOF
 
-echo "✓ k8s/secret.yaml gerado."
+echo "✓ k8s/services/secret.yaml gerado."
 echo
 echo "Tudo concluído com sucesso."
